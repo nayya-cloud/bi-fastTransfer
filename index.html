@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>m-Transfer</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --blue: #0870c9;
+  --label: #5aadd0;
+  --value: #747b88;
+  --line: #e5edf5;
+  --white: #ffffff;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--blue);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: white;
+}
+
+/* HEADER */
+.topbar {
+  height: 82px;
+  padding: 0 22px;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  border-bottom: 1px solid #fafafa;
+}
+
+.back {
+  color: #2685d0;
+  font-size: 19px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.top-title {
+  text-align: center;
+  font-size: 21px;
+  font-weight: 700;
+  color: #0870c9;
+  white-space: nowrap;
+}
+
+.indicator {
+  justify-self: end;
+  width: 17px;
+  height: 17px;
+  background: #4cdb00;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+
+/* CONTENT */
+.content {
+  padding: 23px 26px 30px;
+}
+
+.page-title {
+  font-size: 27px;
+  line-height: 1.25;
+  font-weight: 700;
+  margin: 8px 0 24px;
+  color: #0870c9;
+}
+
+/* TRANSFER CARDS */
+.transfer-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 17px 16px 20px;
+  margin-bottom: 27px;
+  background: #fff;
+}
+
+.service-title {
+  color: #0870c9;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 9px;
+}
+
+.data-row {
+  display: grid;
+  grid-template-columns: 57% 43%;
+  align-items: center;
+  min-height: 38px;
+  gap: 0;
+}
+
+.data-label {
+  color: var(--label);
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.data-value {
+  color: var(--value);
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  padding-left: 4px;
+}
+
+/* EDITABLE ELEMENTS */
+.editable {
+  cursor: pointer;
+  position: relative;
+  border-radius: 3px;
+  transition: background .15s;
+}
+
+.editable:active {
+  background: #eaf5ff;
+}
+
+.editable:focus-visible {
+  outline: 2px solid #5aadd0;
+  outline-offset: 2px;
+}
+
+/* EDIT DIALOG */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 30, 65, .35);
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 370px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 23px 20px 18px;
+  box-shadow: 0 10px 35px rgba(0,0,0,.15);
+}
+
+.dialog h2 {
+  font-size: 21px;
+  color: #0870c9;
+  margin: 0 0 8px;
+}
+
+.dialog p {
+  font-size: 13px;
+  color: #7c8794;
+  margin: 0 0 17px;
+}
+
+.dialog input {
+  width: 100%;
+  padding: 13px 12px;
+  font-size: 17px;
+  color: #555f6d;
+  border: 1px solid #dce6f0;
+  border-radius: 7px;
+  outline: none;
+  font-family: inherit;
+}
+
+.dialog input:focus {
+  border-color: #0870c9;
+  box-shadow: 0 0 0 2px rgba(8,112,201,.1);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.actions button {
+  flex: 1;
+  border: none;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.cancel {
+  background: #f0f3f7;
+  color: #596574;
+}
+
+.save {
+  background: #0870c9;
+  color: white;
+  font-weight: 700;
+}
+
+@media (max-width: 380px) {
+  .topbar {
+    height: 72px;
+    padding: 0 15px;
+  }
+
+  .back {
+    font-size: 17px;
+  }
+
+  .top-title {
+    font-size: 19px;
+  }
+
+  .content {
+    padding: 21px 17px 25px;
+  }
+
+  .page-title {
+    font-size: 25px;
+    margin-bottom: 22px;
+  }
+
+  .transfer-card {
+    padding: 15px 12px 17px;
+    margin-bottom: 23px;
+  }
+
+  .service-title {
+    font-size: 23px;
+  }
+
+  .data-row {
+    grid-template-columns: 56% 44%;
+    min-height: 37px;
+  }
+
+  .data-label,
+  .data-value {
+    font-size: 15px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="back editable"
+         data-key="back"
+         tabindex="0">Back</div>
+
+    <div class="top-title editable"
+         data-key="header"
+         tabindex="0">m-Transfer</div>
+
+    <div class="indicator"></div>
+  </header>
+
+  <main class="content">
+
+    <h1 class="page-title editable"
+        data-key="pageTitle"
+        tabindex="0">Layanan Transfer</h1>
+
+    <!-- BI FAST -->
+    <section class="transfer-card">
+
+      <h2 class="service-title editable"
+          data-key="biTitle"
+          tabindex="0">BI FAST</h2>
+
+      <div class="data-row">
+        <div class="data-label editable"
+             data-key="usernameLabel"
+             tabindex="0">Username</div>
+        <div class="data-value editable"
+             data-key="biUsername"
+             tabindex="0">user123</div>
+      </div>
+
+      <div class="data-row">
+        <div class="data-label editable"
+             data-key="minimumLabel"
+             tabindex="0">Total Penarikan</div>
+        <div class="data-value editable"
+             data-key="biMinimum"
+             tabindex="0">Rp 10,000.00</div>
+      </div>
+
+      <div class="data-row">
+        <div class="data-label editable"
+             data-key="feeLabel"
+             tabindex="0">Biaya</div>
+        <div class="data-value editable"
+             data-key="biFee"
+             tabindex="0">Rp 2,500.00</div>
+      </div>
+
+      <div class="data-row">
+        <div class="data-label editable"
+             data-key="timeLabel"
+             tabindex="0">Waktu Layanan</div>
+        <div class="data-value editable"
+             data-key="biTime"
+             tabindex="0">24 Jam</div>
+      </div>
+
+    </section>
+
+    <!-- REALTIME ONLINE -->
+    <section class="transfer-card">
+
+      <h2 class="service-title editable"
+          data-key="rtTitle"
+          tabindex="0">Realtime Online</h2>
+
+      <div class="data-row">
+        <div class="data-label editable"
+             data-key="usernameLabel"
+             tabindex="0">Username</div>
+        <div class="data-value editable"
+             data-key="rtUsername"
+             tabindex="0">user123</div>
+      </div>
+
+      <div class="data-row">
+        <div class="data-label editable"
+             data-key="minimumLabel"
+             tabindex="0">Total Penarikan</div>
+        <div class="data-value editable"
+             data-key="rtMinimum"
+             tabindex="0">Rp 10,000.00</div>
+      </div>
+
+      <div class="data-row">
+        <div class="data-label editable"
+             data-key="feeLabel"
+             tabindex="0">Biaya</div>
+        <div class="data-value editable"
+             data-key="rtFee"
+             tabindex="0">Rp 6,500.00</div>
+      </div>
+
+      <div class="data-row">
+        <div class="data-label editable"
+             data-key="timeLabel"
+             tabindex="0">Waktu Layanan</div>
+        <div class="data-value editable"
+             data-key="rtTime"
+             tabindex="0">24 Jam</div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<!-- EDIT POPUP -->
+<div class="overlay" id="editOverlay">
+  <div class="dialog" role="dialog"
+       aria-modal="true"
+       aria-labelledby="editHeading">
+
+    <h2 id="editHeading">Edit Data</h2>
+    <p id="editDescription">Ubah teks yang dipilih.</p>
+
+    <input id="editInput"
+           type="text"
+           autocomplete="off"
+           spellcheck="false">
+
+    <div class="actions">
+      <button class="cancel" id="cancelBtn"
+              type="button">Batal</button>
+      <button class="save" id="saveBtn"
+              type="button">Simpan</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  const overlay = document.getElementById('editOverlay');
+  const input = document.getElementById('editInput');
+  const heading = document.getElementById('editHeading');
+  const description = document.getElementById('editDescription');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+
+  let activeElement = null;
+
+  const fieldNames = {
+    back: 'Teks tombol kembali',
+    header: 'Judul header',
+    pageTitle: 'Judul halaman',
+    biTitle: 'Nama layanan BI FAST',
+    rtTitle: 'Nama layanan Realtime Online',
+    usernameLabel: 'Label username',
+    minimumLabel: 'Label minimal transaksi',
+    feeLabel: 'Label biaya',
+    timeLabel: 'Label waktu layanan',
+    biUsername: 'Username BI FAST',
+    rtUsername: 'Username Realtime Online',
+    biMinimum: 'Minimal transaksi BI FAST',
+    rtMinimum: 'Minimal transaksi Realtime Online',
+    biFee: 'Biaya BI FAST',
+    rtFee: 'Biaya Realtime Online',
+    biTime: 'Waktu layanan BI FAST',
+    rtTime: 'Waktu layanan Realtime Online'
+  };
+
+  function openEditor(element) {
+    activeElement = element;
+
+    const key = element.dataset.key;
+    heading.textContent = 'Edit Data';
+    description.textContent = fieldNames[key] || 'Ubah teks pilihan';
+
+    input.value = element.textContent.trim();
+    overlay.classList.add('show');
+
+    input.focus();
+    input.select();
+  }
+
+  function closeEditor() {
+    overlay.classList.remove('show');
+    activeElement = null;
+  }
+
+  
+function saveEditor() {
+  if (!activeElement) return;
+
+  let newValue = input.value.trim();
+
+  if (newValue.length === 0) {
+    input.focus();
+    return;
+  }
+
+  const key = activeElement.dataset.key;
+
+  // Format otomatis untuk nominal uang
+  const moneyFields = [
+    'biMinimum',
+    'rtMinimum',
+    'biFee',
+    'rtFee'
+  ];
+
+  if (moneyFields.includes(key)) {
+    // Ambil angka saja, termasuk desimal jika menggunakan titik
+    let cleaned = newValue
+      .replace(/rp/gi, '')
+      .replace(/\s/g, '')
+      .replace(/,/g, '');
+
+    // Terima input angka seperti 10000 atau 10000.50
+    if (/^\d+(\.\d{1,2})?$/.test(cleaned)) {
+      const amount = Number(cleaned);
+
+      newValue = 'Rp ' + amount.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    } else {
+      alert('Masukkan nominal yang valid, contoh: 10000');
+      input.focus();
+      return;
+    }
+  }
+
+  activeElement.textContent = newValue;
+  closeEditor();
+}
+
+
+  document.querySelectorAll('.editable').forEach(function (element) {
+    element.addEventListener('click', function () {
+      openEditor(element);
+    });
+
+    element.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openEditor(element);
+      }
+    });
+  });
+
+  saveBtn.addEventListener('click', saveEditor);
+  cancelBtn.addEventListener('click', closeEditor);
+
+  input.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      saveEditor();
+    }
+
+    if (event.key === 'Escape') {
+      closeEditor();
+    }
+  });
+
+  overlay.addEventListener('click', function (event) {
+    if (event.target === overlay) {
+      closeEditor();
+    }
+  });
+})();
+</script>
+</body>
+</html>
